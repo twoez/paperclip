@@ -18,10 +18,10 @@ export const projectExecutionWorkspacePolicySchema = z
     defaultMode: z.enum(["project_primary", "isolated"]).optional(),
     allowIssueOverride: z.boolean().optional(),
     workspaceStrategy: executionWorkspaceStrategySchema.optional().nullable(),
-    workspaceRuntime: z.record(z.unknown()).optional().nullable(),
-    branchPolicy: z.record(z.unknown()).optional().nullable(),
-    pullRequestPolicy: z.record(z.unknown()).optional().nullable(),
-    cleanupPolicy: z.record(z.unknown()).optional().nullable(),
+    workspaceRuntime: z.record(z.string(), z.unknown()).optional().nullable(),
+    branchPolicy: z.record(z.string(), z.unknown()).optional().nullable(),
+    pullRequestPolicy: z.record(z.string(), z.unknown()).optional().nullable(),
+    cleanupPolicy: z.record(z.string(), z.unknown()).optional().nullable(),
   })
   .strict();
 
@@ -30,7 +30,7 @@ const projectWorkspaceFields = {
   cwd: z.string().min(1).optional().nullable(),
   repoUrl: z.string().url().optional().nullable(),
   repoRef: z.string().optional().nullable(),
-  metadata: z.record(z.unknown()).optional().nullable(),
+  metadata: z.record(z.string(), z.unknown()).optional().nullable(),
 };
 
 export const createProjectWorkspaceSchema = z.object({
