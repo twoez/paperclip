@@ -190,3 +190,10 @@ export {
   type SetPluginState,
   type ListPluginState,
 } from "./plugin.js";
+
+export {
+  createIssueTemplateSchema,
+  updateIssueTemplateSchema,
+  type CreateIssueTemplate,
+  type UpdateIssueTemplate,
+} from "./issue-template.js";

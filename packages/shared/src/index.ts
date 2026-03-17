@@ -148,6 +148,7 @@ export type {
   LegacyPlanDocument,
   IssueAttachment,
   IssueLabel,
+  IssueTemplate,
   Goal,
   Approval,
   ApprovalComment,
@@ -379,6 +380,10 @@ export {
   type PluginStateScopeKey,
   type SetPluginState,
   type ListPluginState,
+  createIssueTemplateSchema,
+  updateIssueTemplateSchema,
+  type CreateIssueTemplate,
+  type UpdateIssueTemplate,
 } from "./validators/index.js";
 
 export { API_PREFIX, API } from "./api.js";

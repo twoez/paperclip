@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useMemo, type ChangeEvent, type DragEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { IssueTemplate } from "@paperclipai/shared";
 import { useDialog } from "../context/DialogContext";
 import { useCompany } from "../context/CompanyContext";
 import { issuesApi } from "../api/issues";
+import { issueTemplatesApi } from "../api/issue-templates";
 import { projectsApi } from "../api/projects";
 import { agentsApi } from "../api/agents";
 import { authApi } from "../api/auth";
@@ -27,6 +29,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Maximize2,
   Minimize2,
   MoreHorizontal,
@@ -43,6 +52,7 @@ import {
   FileText,
   Loader2,
   X,
+  FileText as TemplateIcon,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { extractProviderIdWithFallback } from "../lib/model-utils";
@@ -256,6 +266,8 @@ export function NewIssueDialog() {
   const [dialogCompanyId, setDialogCompanyId] = useState<string | null>(null);
   const [stagedFiles, setStagedFiles] = useState<StagedIssueFile[]>([]);
   const [isFileDragOver, setIsFileDragOver] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>([]);
   const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const executionWorkspaceDefaultProjectId = useRef<string | null>(null);
 
@@ -337,6 +349,20 @@ export function NewIssueDialog() {
         : ["agents", "none", "adapter-models", assigneeAdapterType ?? "none"],
     queryFn: () => agentsApi.adapterModels(effectiveCompanyId!, assigneeAdapterType!),
     enabled: Boolean(effectiveCompanyId) && newIssueOpen && supportsAssigneeOverrides,
+  });
+
+  // Query issue templates
+  const { data: templates } = useQuery({
+    queryKey: queryKeys.issueTemplates.all,
+    queryFn: () => issueTemplatesApi.list(),
+    enabled: newIssueOpen,
+  });
+
+  // Query labels for the company (to match template label names)
+  const { data: labels } = useQuery({
+    queryKey: queryKeys.issues.labels(effectiveCompanyId!),
+    queryFn: () => issuesApi.listLabels(effectiveCompanyId!),
+    enabled: !!effectiveCompanyId && newIssueOpen,
   });
 
   const createIssue = useMutation({
@@ -526,7 +552,42 @@ export function NewIssueDialog() {
     setStagedFiles([]);
     setIsFileDragOver(false);
     setCompanyOpen(false);
+    setSelectedTemplateId(null);
+    setSelectedLabelIds([]);
     executionWorkspaceDefaultProjectId.current = null;
+  }
+
+  // Handle template selection
+  const TEMPLATE_NONE_VALUE = "__none__";
+  function handleTemplateSelect(templateId: string) {
+    if (templateId === TEMPLATE_NONE_VALUE) {
+      setSelectedTemplateId(null);
+      return;
+    }
+    setSelectedTemplateId(templateId);
+    const template = (templates as IssueTemplate[] | undefined)?.find((t) => t.id === templateId);
+    if (!template) return;
+
+    // Populate form fields from template
+    if (template.titleTemplate) {
+      setTitle(template.titleTemplate);
+    }
+    if (template.descriptionTemplate) {
+      setDescription(template.descriptionTemplate);
+    }
+    if (template.status) {
+      setStatus(template.status);
+    }
+    if (template.priority) {
+      setPriority(template.priority);
+    }
+    // Match label names to company labels
+    if (template.labelNames && template.labelNames.length > 0 && labels) {
+      const matchedLabelIds = template.labelNames
+        .map((name: string) => labels.find((l: { name: string; id: string }) => l.name.toLowerCase() === name.toLowerCase())?.id)
+        .filter((id): id is string => Boolean(id));
+      setSelectedLabelIds(matchedLabelIds);
+    }
   }
 
   function handleCompanyChange(companyId: string) {
@@ -866,6 +927,25 @@ export function NewIssueDialog() {
             </Button>
           </div>
         </div>
+
+        {/* Template selector */}
+        {templates && templates.length > 0 && (
+          <div className="px-4 pt-3 pb-2 shrink-0">
+            <Select value={selectedTemplateId ?? TEMPLATE_NONE_VALUE} onValueChange={handleTemplateSelect}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Use template..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TEMPLATE_NONE_VALUE}>No template</SelectItem>
+                {templates.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Title */}
         <div className="px-4 pt-4 pb-2 shrink-0">

@@ -106,4 +106,9 @@ export const queryKeys = {
     dashboard: (pluginId: string) => ["plugins", pluginId, "dashboard"] as const,
     logs: (pluginId: string) => ["plugins", pluginId, "logs"] as const,
   },
+  issueTemplates: {
+    all: ["issue-templates"] as const,
+    allAdmin: ["issue-templates", "all"] as const,
+    detail: (id: string) => ["issue-templates", id] as const,
+  },
 };
