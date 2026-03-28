@@ -63,7 +63,32 @@ export const createIssueLabelSchema = z.object({
 
 export type CreateIssueLabel = z.infer<typeof createIssueLabelSchema>;
 
-export const updateIssueSchema = createIssueSchema.partial().extend({
+export const updateIssueSchema = z.object({
+  projectId: z.string().uuid().optional().nullable(),
+  projectWorkspaceId: z.string().uuid().optional().nullable(),
+  goalId: z.string().uuid().optional().nullable(),
+  parentId: z.string().uuid().optional().nullable(),
+  title: z.string().min(1).optional(),
+  description: z.string().optional().nullable(),
+  status: z.enum(ISSUE_STATUSES).optional(),
+  priority: z.enum(ISSUE_PRIORITIES).optional(),
+  assigneeAgentId: z.string().uuid().optional().nullable(),
+  assigneeUserId: z.string().optional().nullable(),
+  requestDepth: z.number().int().nonnegative().optional(),
+  billingCode: z.string().optional().nullable(),
+  assigneeAdapterOverrides: issueAssigneeAdapterOverridesSchema.optional().nullable(),
+  executionWorkspaceId: z.string().uuid().optional().nullable(),
+  executionWorkspacePreference: z.enum([
+    "inherit",
+    "shared_workspace",
+    "isolated_workspace",
+    "operator_branch",
+    "reuse_existing",
+    "agent_default",
+  ]).optional().nullable(),
+  executionWorkspaceSettings: issueExecutionWorkspaceSettingsSchema.optional().nullable(),
+  labelIds: z.array(z.string().uuid()).optional(),
+}).extend({
   comment: z.string().min(1).optional(),
   reopen: z.boolean().optional(),
   hiddenAt: z.string().datetime().nullable().optional(),

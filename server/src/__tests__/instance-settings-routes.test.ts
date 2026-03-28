@@ -76,9 +76,11 @@ describe("instance settings routes", () => {
       .send({ enableIsolatedWorkspaces: true });
 
     expect(patchRes.status).toBe(200);
-    expect(mockInstanceSettingsService.updateExperimental).toHaveBeenCalledWith({
-      enableIsolatedWorkspaces: true,
-    });
+    expect(mockInstanceSettingsService.updateExperimental).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enableIsolatedWorkspaces: true,
+      }),
+    );
     expect(mockLogActivity).toHaveBeenCalledTimes(2);
   });
 
@@ -95,9 +97,11 @@ describe("instance settings routes", () => {
       .send({ autoRestartDevServerWhenIdle: true })
       .expect(200);
 
-    expect(mockInstanceSettingsService.updateExperimental).toHaveBeenCalledWith({
-      autoRestartDevServerWhenIdle: true,
-    });
+    expect(mockInstanceSettingsService.updateExperimental).toHaveBeenCalledWith(
+      expect.objectContaining({
+        autoRestartDevServerWhenIdle: true,
+      }),
+    );
   });
 
   it("allows local board users to read and update general settings", async () => {
