@@ -671,6 +671,13 @@ export function agentRoutes(db: Db) {
     res.json(models);
   });
 
+  // Company-less model listing — only requires an authenticated session
+  router.get("/adapters/:type/models", async (req, res) => {
+    const type = req.params.type as string;
+    const models = await listAdapterModels(type);
+    res.json(models);
+  });
+
   router.post(
     "/companies/:companyId/adapters/:type/test-environment",
     validate(testAdapterEnvironmentSchema),

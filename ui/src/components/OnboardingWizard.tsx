@@ -201,8 +201,8 @@ export function OnboardingWizard() {
     queryKey: createdCompanyId
       ? queryKeys.agents.adapterModels(createdCompanyId, adapterType)
       : ["agents", "none", "adapter-models", adapterType],
-    queryFn: () => agentsApi.adapterModels(createdCompanyId!, adapterType),
-    enabled: Boolean(createdCompanyId) && effectiveOnboardingOpen && step === 2
+    queryFn: () => agentsApi.adapterModels(createdCompanyId, adapterType),
+    enabled: effectiveOnboardingOpen && step === 2
   });
   const isLocalAdapter =
     adapterType === "claude_local" ||
