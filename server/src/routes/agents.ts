@@ -672,13 +672,13 @@ export function agentRoutes(db: Db) {
   });
 
   // Company-less model listing — only requires an authenticated session
-  router.get("/adapters/:type/models", async (req, res) =u003e {
+  router.get("/adapters/:type/models", async (req, res) => {
     const type = req.params.type as string;
     const models = await listAdapterModels(type);
     res.json(models);
   });
 
-  router.get("/companies/:companyId/adapters/:type/detect-model", async (req, res) =u003e {
+  router.get("/companies/:companyId/adapters/:type/detect-model", async (req, res) => {
     const companyId = req.params.companyId as string;
     assertCompanyAccess(req, companyId);
     const type = req.params.type as string;
